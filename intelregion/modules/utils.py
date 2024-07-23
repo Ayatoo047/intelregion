@@ -5,7 +5,6 @@ from django.utils import timezone
 from cryptography.fernet import Fernet
 from django.conf import settings
 from django.utils.crypto import get_random_string
-from customer.models import *
 
 
 def log_request(*args):

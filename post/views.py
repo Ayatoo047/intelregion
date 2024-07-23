@@ -1,19 +1,19 @@
 from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
-
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from intelregion.modules.exceptions import raise_serializer_error_msg
 from intelregion.modules.permissions import IsCommentAuthor, IsPostAuthor
 from intelregion.modules.utils import api_response, get_incoming_request_checks, incoming_request_checks
-from post.models import Blog
+from post.models import Blog, Comment
 from .serializers import BlogDetailSerializer, BlogSerializer, CommentSerializer
 from rest_framework.response import Response
 from rest_framework import status,permissions
 from rest_framework.filters import SearchFilter
-from django_filters.rest_framework import DjangoFilterBackend
+# from django_filters.rest_framework import DjangoFilterBackend
 
 
 # Create your views here.
-class NewsView(ModelViewSet):
+class BlogView(ModelViewSet):
     """    
         PAYLOAD
     
@@ -147,8 +147,6 @@ class NewsView(ModelViewSet):
         )
         return super().update(request, *args, **kwargs)
 
-
-
 class CommentView(ModelViewSet):
     """    
         PAYLOAD
@@ -168,7 +166,7 @@ class CommentView(ModelViewSet):
     
     # permission_classes = [IsAuthenticated & (IsAdmin | IsAgentAdmin)]
     serializer_class = CommentSerializer
-    queryset = Blog.objects.all()
+    queryset = Comment.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     
     def get_serializer_class(self):
@@ -210,6 +208,36 @@ class CommentView(ModelViewSet):
             )
         )
      
+    def create(self, request, *args, **kwargs):
+        status_, data = incoming_request_checks(request)
+        if not status_:
+            return Response(
+                api_response(message=data, status=False),
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid() or raise_serializer_error_msg(errors=serializer.errors)
+        
+        response = serializer.save()
+        return Response(
+            api_response(
+                message="News Created Successfully", status=True, data=response
+            )
+        )
+        return super().create(request, *args, **kwargs)
+    
+class CommentDetailView(RetrieveUpdateDestroyAPIView):
+    serializer_class = CommentSerializer
+    queryset = Comment.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return []
+        if self.request.method in ['PATCH', 'PUT', 'DELETE']:
+            return [IsCommentAuthor]
+        return super().get_permissions()
+    
     def retrieve(self, request, *args, **kwargs):
         status_, data = get_incoming_request_checks(request)
         if not status_:
@@ -231,24 +259,6 @@ class CommentView(ModelViewSet):
             )
         )
 
-    def create(self, request, *args, **kwargs):
-        status_, data = incoming_request_checks(request)
-        if not status_:
-            return Response(
-                api_response(message=data, status=False),
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid() or raise_serializer_error_msg(errors=serializer.errors)
-        
-        response = serializer.save()
-        return Response(
-            api_response(
-                message="News Created Successfully", status=True, data=response
-            )
-        )
-        return super().create(request, *args, **kwargs)
-    
     def update(self, request, *args, **kwargs):
         status_, data = incoming_request_checks(request)
         if not status_:
@@ -268,3 +278,22 @@ class CommentView(ModelViewSet):
             )
         )
         return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.delete
+        return Response(api_response(message="News Updated Successfully",
+                                     status=True),
+                        status=status.HTTP_204_NO_CONTENT)
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
