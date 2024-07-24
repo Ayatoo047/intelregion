@@ -19,7 +19,7 @@ class Blog(models.Model):
 class Comment(models.Model):
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     blogs = models.ForeignKey(Blog, on_delete=models.CASCADE)
-    content = models.TextField(null=False)
+    content = models.TextField(null=False, blank=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     

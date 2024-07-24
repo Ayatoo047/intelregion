@@ -38,6 +38,7 @@ class BlogView(ModelViewSet):
     filter_backends = [SearchFilter]
     search_fields = ['title']
     permission_classes = [permissions.IsAuthenticated]
+    # pagination_class = 
     
     
     def get_serializer_class(self):
@@ -154,6 +155,15 @@ class BlogView(ModelViewSet):
                 message="Blog Updated Successfully", status=True, data=response
             )
         )
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.delete
+        return Response(api_response(
+                        message="Comment Updated Successfully",
+                        status=True),
+                        status=status.HTTP_204_NO_CONTENT)
+
 
 class CommentView(mixins.CreateModelMixin,
                   mixins.ListModelMixin,

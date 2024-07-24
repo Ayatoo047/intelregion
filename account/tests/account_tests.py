@@ -20,7 +20,7 @@ from model_bakery import baker
 @pytest.fixture
 def create_user(api_client):
     def do_create_user(user:str):
-        header = {'HTTP_X-Api-Key':'R7zoOlmyoHSWZH1NMU9RTzUv5nfSo944YGLHX6SXYlYxzll3rHISEAgbdj3aItmQdwf9Axo2d4BuLevRoKsJaISarl8dYPoA18eojUzgBlobCo3oHu2WkGEFVC2f1uAp'}
+        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}
         
         if user == 'good':
             user = {
@@ -38,7 +38,7 @@ def create_user(api_client):
                     "username":"testuser",
                 }
             }
-        response = api_client.post('/customer/user/', user, format="json", **header)
+        response = api_client.post('/api/user/', user, format="json", **header)
         return response
     return do_create_user
 
@@ -46,7 +46,7 @@ def create_user(api_client):
 @pytest.fixture
 def update_user(api_client : APIClient):
     def do_update_user(user:str, method:str, is_auth=False):
-        header = {'HTTP_X-Api-Key':'R7zoOlmyoHSWZH1NMU9RTzUv5nfSo944YGLHX6SXYlYxzll3rHISEAgbdj3aItmQdwf9Axo2d4BuLevRoKsJaISarl8dYPoA18eojUzgBlobCo3oHu2WkGEFVC2f1uAp'}
+        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}
         
         if user == 'good':
            user_detail =  {
@@ -54,10 +54,6 @@ def update_user(api_client : APIClient):
             "data": {
                 "first_name": "Test",
                 "last_name": "Testing",
-                "address": "Test user a",
-                "phone": "08100000000",
-                "state": "Oyo",
-                "country": "Nigeria"
                 }
             }
         else:
@@ -71,10 +67,9 @@ def update_user(api_client : APIClient):
             api_client.force_authenticate(user=new_user)
             
         if method == 'put':
-            
-            response = api_client.put('/customer/user/', user_detail, format="json", **header)
+            response = api_client.put('/api/user/', user_detail, format="json", **header)
         elif method == 'patch':
-            response = api_client.patch('/customer/user/', user_detail, format="json", **header)
+            response = api_client.patch('/api/user/', user_detail, format="json", **header)
         
         return response
     return do_update_user
@@ -82,12 +77,12 @@ def update_user(api_client : APIClient):
 @pytest.fixture
 def get_user(api_client : APIClient):
     def do_get_user(is_auth=False):
-        header = {'HTTP_X-Api-Key':'R7zoOlmyoHSWZH1NMU9RTzUv5nfSo944YGLHX6SXYlYxzll3rHISEAgbdj3aItmQdwf9Axo2d4BuLevRoKsJaISarl8dYPoA18eojUzgBlobCo3oHu2WkGEFVC2f1uAp'}   
+        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}   
         if is_auth:
             user = baker.make(User)
             api_client.force_authenticate(user=user)
             
-        response = api_client.get('/customer/user/', **header)
+        response = api_client.get('/api/user/', **header)
         
         return response
     return do_get_user
@@ -95,7 +90,7 @@ def get_user(api_client : APIClient):
 @pytest.fixture
 def login_user(api_client : APIClient):
     def do_login_user(user:str):
-        header = {'HTTP_X-Api-Key':'R7zoOlmyoHSWZH1NMU9RTzUv5nfSo944YGLHX6SXYlYxzll3rHISEAgbdj3aItmQdwf9Axo2d4BuLevRoKsJaISarl8dYPoA18eojUzgBlobCo3oHu2WkGEFVC2f1uAp'}   
+        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}   
 
         if user == 'good':
             loginuser = baker.make(User, username="testing", password="@checkpass")
@@ -116,7 +111,7 @@ def login_user(api_client : APIClient):
                 }
             
         
-        response = api_client.post('/customer/login/', user_detail, format="json",**header)
+        response = api_client.post('/api/login/', user_detail, format="json",**header)
         
         return response
     return do_login_user
