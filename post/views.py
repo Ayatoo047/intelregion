@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
+from rest_framework import mixins
+from rest_framework.viewsets import GenericViewSet
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from intelregion.modules.exceptions import raise_serializer_error_msg
-from intelregion.modules.permissions import IsCommentAuthor, IsPostAuthor
+from intelregion.modules.permissions import IsBlogOwner, IsCommentAuthor, IsCommentOwner, IsPostAuthor
 from intelregion.modules.utils import api_response, get_incoming_request_checks, incoming_request_checks
 from post.models import Blog, Comment
-from .serializers import BlogDetailSerializer, BlogSerializer, CommentSerializer
+from .serializers import BlogDetailSerializer, BlogSerializer, BlogSerializerIn, CommentSerializer, CommentSerializerIn
 from rest_framework.response import Response
 from rest_framework import status,permissions
 from rest_framework.filters import SearchFilter
@@ -20,14 +22,14 @@ class BlogView(ModelViewSet):
     {
         "requestType":"inbound",
         "data":{
-            "title":"News 1",
+            "title":"Blog 1",
             "body":"This is the bodyy",
             "category":1,       integer id of a category
             "image":image-file  this is nullable
         }
     }
     
-    news/{id}   == To Get a single news and Update it
+    blog/{id}   == To Get a single news and Update it
     """
     
     # permission_classes = [IsAuthenticated & (IsAdmin | IsAgentAdmin)]
@@ -37,18 +39,24 @@ class BlogView(ModelViewSet):
     search_fields = ['title']
     permission_classes = [permissions.IsAuthenticated]
     
+    
     def get_serializer_class(self):
         if self.request.method in ['POST', 'PATCH', 'PUT']:
-            return BlogDetailSerializer
+            return BlogSerializerIn
         return super().get_serializer_class()
+    
+        
+    def get_serializer_context(self):
+        return {'user_id' : self.request.user.id}
+        
     
     def get_permissions(self):
         if self.request.method == 'GET':
             return []
         if self.request.method in ['PATCH', 'PUT', 'DELETE']:
-            return [IsPostAuthor]
+            # return [IsPostAuthor]
+            return [permissions.IsAuthenticated(), IsBlogOwner()]
         return super().get_permissions()
-    
     
     def list(self, request, *args, **kwargs):
         status_, data = get_incoming_request_checks(request)
@@ -61,7 +69,7 @@ class BlogView(ModelViewSet):
         if len(queryset) == 0:
             return Response(
                 api_response(
-                    message="No News at the moment", status=True, data=None
+                    message="No blog at the moment", status=True, data=None
                 )
             )
         page = self.paginate_queryset(queryset)
@@ -76,8 +84,7 @@ class BlogView(ModelViewSet):
                 message="News Retrieved Successfully", status=True, data=response
             )
         )
-    
-    
+        
     def retrieve(self, request, *args, **kwargs):
         status_, data = get_incoming_request_checks(request)
         if not status_:
@@ -89,7 +96,7 @@ class BlogView(ModelViewSet):
         if instance is None:
             return Response(
                 api_response(
-                    message="The news you are trying to get is not available", status=True, data=None
+                    message="The blog you are trying to get is not available", status=True, data=None
                 )
             )
         serializer = self.get_serializer(instance)
@@ -106,18 +113,20 @@ class BlogView(ModelViewSet):
                 api_response(message=data, status=False),
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        data['owner'] = self.request.user.id
+        print(data)
         serializer = self.get_serializer(data=data)
         serializer.is_valid() or raise_serializer_error_msg(errors=serializer.errors)
         data : dict = data
         title = data.get('title', None)
         if title is not None:
             if Blog.objects.filter(title=title).exists():
-                return Response({'message':'News with the title already exist'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'message':'Blog with the title already exist'}, status=status.HTTP_400_BAD_REQUEST)
         
         response = serializer.save()
         return Response(
             api_response(
-                message="News Created Successfully", status=True, data=response
+                message="Blog Created Successfully", status=True, data=response
             )
         )
         return super().create(request, *args, **kwargs)
@@ -130,31 +139,32 @@ class BlogView(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         instance = self.get_object()
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop('partial', True)
         serializer = self.get_serializer(instance, data=data, partial=partial)
         serializer.is_valid() or raise_serializer_error_msg(errors=serializer.errors)
         data : dict = data
         title = data.get('title', None)
         if title is not None:
             if Blog.objects.filter(title=title).exists() and Blog.objects.get(title=title).id != instance.id:
-                return Response({'message':'News with the title already exist'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'message':'Blog with the title already exist'}, status=status.HTTP_400_BAD_REQUEST)
         
         response = serializer.save()
         return Response(
             api_response(
-                message="News Updated Successfully", status=True, data=response
+                message="Blog Updated Successfully", status=True, data=response
             )
         )
-        return super().update(request, *args, **kwargs)
 
-class CommentView(ModelViewSet):
+class CommentView(mixins.CreateModelMixin,
+                  mixins.ListModelMixin,
+                  GenericViewSet):
     """    
         PAYLOAD
     
     {
         "requestType":"inbound",
         "data":{
-            "title":"News 1",
+            "title":"Blog 1",
             "body":"This is the bodyy",
             "category":1,       integer id of a category
             "image":image-file  this is nullable
@@ -169,9 +179,13 @@ class CommentView(ModelViewSet):
     queryset = Comment.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     
+    def get_serializer_context(self):
+        return {'user_id' : self.request.user.id,
+                'blog_id': self.kwargs.get('blog_pk', None)}
+    
     def get_serializer_class(self):
         if self.request.method in ['POST', 'PATCH', 'PUT']:
-            return CommentSerializer
+            return CommentSerializerIn
         return super().get_serializer_class()
     
     def get_permissions(self):
@@ -215,6 +229,7 @@ class CommentView(ModelViewSet):
                 api_response(message=data, status=False),
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        
         serializer = self.get_serializer(data=data)
         serializer.is_valid() or raise_serializer_error_msg(errors=serializer.errors)
         
@@ -231,11 +246,20 @@ class CommentDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     
+    def get_serializer_context(self):
+        return {'user_id':self.request.user.id}
+    
+    def get_serializer_class(self):
+        if self.request.method in ['PATCH', 'PUT']:
+            return CommentSerializerIn
+        return super().get_serializer_class()
+    
     def get_permissions(self):
         if self.request.method == 'GET':
             return []
         if self.request.method in ['PATCH', 'PUT', 'DELETE']:
-            return [IsCommentAuthor]
+            return [permissions.IsAuthenticated(), IsCommentOwner()]
+
         return super().get_permissions()
     
     def retrieve(self, request, *args, **kwargs):
@@ -249,13 +273,13 @@ class CommentDetailView(RetrieveUpdateDestroyAPIView):
         if instance is None:
             return Response(
                 api_response(
-                    message="The news you are trying to get is not available", status=True, data=None
+                    message="The comment you are trying to get is not available", status=True, data=None
                 )
             )
         serializer = self.get_serializer(instance)
         return Response(
             api_response(
-                message=f"News retrieved Successfully", status=True, data=serializer.data
+                message=f"comment retrieved Successfully", status=True, data=serializer.data
             )
         )
 
@@ -267,14 +291,14 @@ class CommentDetailView(RetrieveUpdateDestroyAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         instance = self.get_object()
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop('partial', True)
         serializer = self.get_serializer(instance, data=data, partial=partial)
         serializer.is_valid() or raise_serializer_error_msg(errors=serializer.errors)
         
         response = serializer.save()
         return Response(
             api_response(
-                message="News Updated Successfully", status=True, data=response
+                message="Comment Updated Successfully", status=True, data=response
             )
         )
         return super().update(request, *args, **kwargs)
@@ -282,7 +306,7 @@ class CommentDetailView(RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.delete
-        return Response(api_response(message="News Updated Successfully",
+        return Response(api_response(message="Comment Updated Successfully",
                                      status=True),
                         status=status.HTTP_204_NO_CONTENT)
 

@@ -18,6 +18,16 @@ class UserView(CreateModelMixin, RetrieveModelMixin,
     serializer_class = UserDetailSerializer
     permission_classes = [IsAuthenticated]
     
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_authenticated:
+            self.http_method_names = ['get', 'put', 'patch', 'delete']
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self):
+        user_id = self.request.user.id
+        user = User.objects.get(id=user_id)
+        return user
+    
     def get_permissions(self):
         if self.request.method not in ['PATCH', 'PUT', 'GET']:
             return []
@@ -86,7 +96,7 @@ class UserView(CreateModelMixin, RetrieveModelMixin,
         return self.retrieve(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+        return self.partial_update(request, *args, **kwargs)
 
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
