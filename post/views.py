@@ -76,7 +76,12 @@ class BlogView(ModelViewSet):
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = BlogSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            response = self.get_paginated_response(serializer.data)
+            return Response(
+            api_response(
+                message="News Retrieved Successfully", status=True, data=response.data
+                )
+            )
 
         serializer = BlogSerializer(queryset, many=True)
         response = serializer.data
@@ -222,7 +227,12 @@ class CommentView(mixins.CreateModelMixin,
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            response = self.get_paginated_response(serializer.data)
+            return Response(
+            api_response(
+                message="News Retrieved Successfully", status=True, data=response.data
+                )
+            )
 
         serializer = self.get_serializer(queryset, many=True)
         response = serializer.data
