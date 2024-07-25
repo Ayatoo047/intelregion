@@ -12,6 +12,9 @@ on:
 # permissions:
 #   contents: read
 
+env:
+  X_API_KEY: ${{secrets.X_API_KEY}}
+
 jobs:
   build:
 
@@ -36,8 +39,9 @@ jobs:
     #     flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
     #     # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
     #     flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: TShow Key
+      run: |
+        echo ${{secrets.X_API_KEY}}
     - name: Test with pytest
       run: |
         pytest
-      env:
-        X_API_KEY: ${{secrets.X_API_KEY}}
