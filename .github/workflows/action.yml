@@ -27,7 +27,14 @@ jobs:
           python -m pip install --upgrade pip
       - name: Upgrade dependencies
         run: |
-          pip install requirements.txt
+          pip install cryptography
+          pip install Django
+          pip install djangorestframework
+          pip install djangorestframework-simplejwt
+          pip install drf-nested-routers
+          pip install model-bakery
+          pip install pytest-django
+
       - name: Testing with Pytest
         run: |
           pip install pytest-django
