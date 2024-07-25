@@ -24,6 +24,7 @@ jobs:
           pip install -r requirements.txt
       - name: Testing with Pytest
         run: |
+          pip install pytest-django
           pytest
         env:
           X_API_KEY: ${{secrets.X_API_KEY}}
