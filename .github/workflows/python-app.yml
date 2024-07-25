@@ -48,3 +48,5 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+      env:
+        X_API_KEY: ${{ secrets.X_API_KEY }}
