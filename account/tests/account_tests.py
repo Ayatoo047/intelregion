@@ -1,26 +1,15 @@
-# user endpoints
-# POST /api/users/register - Register a new user
-# bad data and good data
-
-
-# POST /api/users/login - Authenticate user and return a token
-# bad data and good data
-
-
-# GET /api/users/profile - Get user profile (Authenticated)
-# bad data and good data
-# auth and no auth
-
 from rest_framework.test import APIClient
 from rest_framework import status
 import pytest
 from django.contrib.auth.models import User
 from model_bakery import baker
+from intelregion.settings import X_API_KEY
+
 
 @pytest.fixture
 def create_user(api_client):
     def do_create_user(user:str):
-        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}
+        header = {'HTTP_X-Api-Key':str(X_API_KEY)}
         
         if user == 'good':
             user = {
@@ -46,7 +35,7 @@ def create_user(api_client):
 @pytest.fixture
 def update_user(api_client : APIClient):
     def do_update_user(user:str, method:str, is_auth=False):
-        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}
+        header = {'HTTP_X-Api-Key':str(X_API_KEY)}
         
         if user == 'good':
            user_detail =  {
@@ -77,7 +66,7 @@ def update_user(api_client : APIClient):
 @pytest.fixture
 def get_user(api_client : APIClient):
     def do_get_user(is_auth=False):
-        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}   
+        header = {'HTTP_X-Api-Key':str(X_API_KEY)}   
         if is_auth:
             user = baker.make(User)
             api_client.force_authenticate(user=user)
@@ -90,7 +79,7 @@ def get_user(api_client : APIClient):
 @pytest.fixture
 def login_user(api_client : APIClient):
     def do_login_user(user:str):
-        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}   
+        header = {'HTTP_X-Api-Key':str(X_API_KEY)}   
 
         if user == 'good':
             loginuser = baker.make(User, username="testing", password="@checkpass")

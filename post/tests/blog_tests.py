@@ -7,14 +7,15 @@ from rest_framework import status
 import pytest
 from django.contrib.auth.models import User
 from model_bakery import baker
-
 from post.models import Blog, Comment
+from intelregion.settings import X_API_KEY
+
 
 
 @pytest.fixture
 def create_blog(api_client : APIClient):
     def do_create_blog(blog:str, is_auth=False):
-        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}
+        header = {'HTTP_X-Api-Key':str(X_API_KEY)}
         
         if blog == 'good':
            blog_detail =  {
