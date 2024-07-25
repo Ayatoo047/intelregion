@@ -251,7 +251,7 @@ class TestGetBlog():
         response = get_allblog()
         
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data['data']) == 10
+        assert len(response.data['data']['results']) == 10
         
     def test_getSingle_200_if_okay(self, get_a_blog):
 
