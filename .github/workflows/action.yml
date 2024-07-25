@@ -27,7 +27,7 @@ jobs:
           python -m pip install --upgrade pip
       - name: Upgrade dependencies
         run: |
-          pip install -r requirements.txt
+          pip install requirements.txt
       - name: Testing with Pytest
         run: |
           pip install pytest-django
