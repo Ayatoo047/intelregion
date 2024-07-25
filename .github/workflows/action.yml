@@ -27,17 +27,10 @@ jobs:
           python -m pip install --upgrade pip
       - name: Upgrade dependencies
         run: |
-          pip install cryptography
-          pip install Django
-          pip install djangorestframework
-          pip install djangorestframework-simplejwt
-          pip install drf-nested-routers
-          pip install model-bakery
-          pip install pytest-django
+          pip install cryptography Django djangorestframework djangorestframework-simplejwt drf-nested-routers model-bakery pytest-django
 
       - name: Testing with Pytest
         run: |
-          pip install pytest-django
           pytest
         env:
           X_API_KEY: ${{secrets.X_API_KEY}}
