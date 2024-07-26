@@ -9,6 +9,7 @@ on:
 env:
   X_API_KEY: ${{secrets.X_API_KEY}}
   SECRET_KEY: ${{secrets.SECRET_KEY}}
+  ENVIRONMENT: "github"
 
 jobs:
   test:
@@ -32,7 +33,7 @@ jobs:
       env:
         X_API_KEY: ${{ secrets.X_API_KEY }}
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        
+        ENVIRONMENT: "github"
   # deploy:
   #   runs-on: ubuntu-latest
   #   name: Deploy
