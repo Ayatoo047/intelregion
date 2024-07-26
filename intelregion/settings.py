@@ -127,7 +127,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # Internationalization
