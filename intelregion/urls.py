@@ -16,8 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http.response import JsonResponse
+
+
+def homepage(request):
+    return JsonResponse({"message": "Welcome to IntelRegion Assessment Backend"})
 
 urlpatterns = [
+    path("", homepage),
     path("admin/", admin.site.urls),
     path("api/", include("account.urls")),
     path("api/", include("post.urls")),
