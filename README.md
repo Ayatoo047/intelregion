@@ -25,7 +25,9 @@ To run the test in the application, use the command below in the root directory 
 This will run all the test cases
 
 ## CI/CD 
-A continous integration configuration has been applied on this project so that it automatically run the test cases when it changes are pushed to the github
+A continous integration configuration has been applied on this project so that it automatically run the test cases when it changes are pushed to the github. But it is required to set the secrets (SECRET_KEY and X-API-KEY) in the github.
+
+If you wish to deploy to an heroku dynos. You just need to modify the workflow yml fille and provide the heroku credentials
 
 
 ## Installation
