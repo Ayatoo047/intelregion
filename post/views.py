@@ -221,7 +221,7 @@ class CommentView(mixins.CreateModelMixin,
         if len(queryset) == 0:
             return Response(
                 api_response(
-                    message="No News at the moment", status=True, data=None
+                    message="No Comment for the blog at the moment", status=True, data=None
                 )
             )
         page = self.paginate_queryset(queryset)
@@ -230,7 +230,7 @@ class CommentView(mixins.CreateModelMixin,
             response = self.get_paginated_response(serializer.data)
             return Response(
             api_response(
-                message="News Retrieved Successfully", status=True, data=response.data
+                message="Comments Retrieved Successfully", status=True, data=response.data
                 )
             )
 
@@ -238,7 +238,7 @@ class CommentView(mixins.CreateModelMixin,
         response = serializer.data
         return Response(
             api_response(
-                message="News Retrieved Successfully", status=True, data=response
+                message="Comments Retrieved Successfully", status=True, data=response
             )
         )
      
@@ -256,7 +256,7 @@ class CommentView(mixins.CreateModelMixin,
         response = serializer.save()
         return Response(
             api_response(
-                message="News Created Successfully", status=True, data=response
+                message="Comment Created Successfully", status=True, data=response
             )
         )
         return super().create(request, *args, **kwargs)
@@ -326,7 +326,7 @@ class CommentDetailView(RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.delete
-        return Response(api_response(message="Comment Updated Successfully",
+        return Response(api_response(message="Comment Deleted Successfully",
                                      status=True),
                         status=status.HTTP_204_NO_CONTENT)
 

@@ -24,7 +24,7 @@ environ.Env.read_env(os.path.join(".env"))
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-)wtvj84$x3fo(dw37p+zv51ul#i*2pouz2hh(jc89+=j43iole"
+SECRET_KEY = env("SECRET_KEY", None)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -85,12 +85,27 @@ WSGI_APPLICATION = "intelregion.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+ENVIRONMENT = env("ENVIRONMENT", None)
+
+if ENVIRONMENT != 'docker':
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    # Database
+    DATABASES = {
+        "default": {
+            "ENGINE": env("DATABASE_ENGINE", None),
+            "NAME": env("DATABASE_NAME", None),
+            "USER": env("DATABASE_USER", None),
+            "PASSWORD": env("DATABASE_PASSWORD", None),
+            "HOST": env("DATABASE_HOST", None),
+            "PORT": env("DATABASE_PORT", None),
+        }
+    }
 
 
 # Password validation
@@ -137,7 +152,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "x-api-key",
 ]
-# AUTH_USER_MODEL = 'core.User'
+
 X_API_KEY = env("X_API_KEY", None)
 
 REST_FRAMEWORK = {
