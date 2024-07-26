@@ -1,7 +1,3 @@
-
-# blog Endpoints:
-# GET /api/posts - Retrieve all posts (Paginated)
-# just one test for work fine
 from rest_framework.test import APIClient
 from rest_framework import status
 import pytest
@@ -47,7 +43,7 @@ def create_blog(api_client : APIClient):
 @pytest.fixture
 def create_comment(api_client : APIClient):
     def do_create_comment(comment:str, is_auth=False):
-        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}
+        header = {'HTTP_X-Api-Key':str(X_API_KEY)}
         create_blog = baker.make(Blog)
         
         
@@ -77,7 +73,7 @@ def create_comment(api_client : APIClient):
 @pytest.fixture
 def update_blog(api_client : APIClient):
     def do_update_blog(blog:str, method:str, is_auth=False):
-        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}
+        header = {'HTTP_X-Api-Key':str(X_API_KEY)}
         
         if blog == 'good':
            blog_detail =  {
@@ -125,7 +121,7 @@ def update_blog(api_client : APIClient):
 @pytest.fixture
 def comment_update(api_client : APIClient):
     def do_comment_update(comment:str, method:str, is_auth=False):
-        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}
+        header = {'HTTP_X-Api-Key':str(X_API_KEY)}
         
         if comment == 'good':
            blog_detail =  {
@@ -170,7 +166,7 @@ def comment_update(api_client : APIClient):
 @pytest.fixture
 def comment_delete(api_client : APIClient):
     def do_comment_delete(comment:str, is_auth=False):
-        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}
+        header = {'HTTP_X-Api-Key':str(X_API_KEY)}
         
         if is_auth and comment == 'good':
             new_user = baker.make(User)
@@ -190,7 +186,7 @@ def comment_delete(api_client : APIClient):
 @pytest.fixture
 def delete_blog(api_client : APIClient):
     def do_delete_blog(is_auth=False):
-        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}
+        header = {'HTTP_X-Api-Key':str(X_API_KEY)}
                 
         if is_auth:
             new_user = baker.make(User)
@@ -210,7 +206,7 @@ def delete_blog(api_client : APIClient):
 @pytest.fixture
 def get_allblog(api_client : APIClient):
     def do_get_allblog():
-        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}
+        header = {'HTTP_X-Api-Key':str(X_API_KEY)}
                 
         baker.make(Blog, _quantity=10)
         
@@ -223,7 +219,7 @@ def get_allblog(api_client : APIClient):
 @pytest.fixture
 def get_a_blog(api_client : APIClient):
     def do_get_a_blog(is_auth=False):
-        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}
+        header = {'HTTP_X-Api-Key':str(X_API_KEY)}
                 
         blog = baker.make(Blog)
         
@@ -235,7 +231,7 @@ def get_a_blog(api_client : APIClient):
 @pytest.fixture
 def get_blog_comments(api_client : APIClient):
     def do_get_blog_comments():
-        header = {'HTTP_X-Api-Key':'47hlXsvMqTyApURzp5DV5OpuPomByecLTUytbwbzCTKhhNghe1fFq9Zl8WL2VJfJ'}
+        header = {'HTTP_X-Api-Key':str(X_API_KEY)}
                 
         blog = baker.make(Blog)
         comments = baker.make(Comment, blogs=blog, _quantity=15)
@@ -266,7 +262,6 @@ class TestCreateBlog():
         response = create_blog('good', True)
 
         assert response.status_code == status.HTTP_200_OK
-        # assert response.data['data'] == 10
         
     
     
@@ -373,24 +368,3 @@ class TestDeleteBlog():
         
         assert response.status_code == status.HTTP_403_FORBIDDEN
         
-
-# POST /api/posts - Create a new post (Authenticated)
-# auth and no auth
-# bad data and good data
-
-
-
-# PUT /api/posts/:id - Update a post by ID (Authenticated & Author only)
-# bad data and good data
-# auth === # user is the owner and not the owner
-
-# DELETE /api/posts/:id - Delete a post by ID (Authenticated & Author only)
-# bad data and good data
-# auth === # user is the owner and not the owner
-
-
-# Comment Endpoints:
-# GET /api/posts/:postId/comments - Retrieve all comments for a post (Paginated)
-# POST /api/posts/:postId/comments - Create a new comment on a post (Authenticated)
-# PUT /api/comments/:id - Update a comment by ID (Authenticated & Author only)
-# DELETE /api/comments/:id - Delete a comment by ID (Authenticated & Author only)

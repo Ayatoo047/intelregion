@@ -1,44 +1,25 @@
-from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from intelregion.modules.exceptions import raise_serializer_error_msg
-from intelregion.modules.permissions import IsBlogOwner, IsCommentAuthor, IsCommentOwner, IsPostAuthor
+from intelregion.modules.permissions import IsBlogOwner, IsCommentOwner
 from intelregion.modules.utils import api_response, get_incoming_request_checks, incoming_request_checks
 from post.models import Blog, Comment
 from .serializers import BlogDetailSerializer, BlogSerializer, BlogSerializerIn, CommentSerializer, CommentSerializerIn
 from rest_framework.response import Response
 from rest_framework import status,permissions
 from rest_framework.filters import SearchFilter
-# from django_filters.rest_framework import DjangoFilterBackend
 
 
 # Create your views here.
 class BlogView(ModelViewSet):
-    """    
-        PAYLOAD
-    
-    {
-        "requestType":"inbound",
-        "data":{
-            "title":"Blog 1",
-            "body":"This is the bodyy",
-            "category":1,       integer id of a category
-            "image":image-file  this is nullable
-        }
-    }
-    
-    blog/{id}   == To Get a single news and Update it
-    """
-    
-    # permission_classes = [IsAuthenticated & (IsAdmin | IsAgentAdmin)]
     serializer_class = BlogDetailSerializer
     queryset = Blog.objects.all()
     filter_backends = [SearchFilter]
     search_fields = ['title']
     permission_classes = [permissions.IsAuthenticated]
-    # pagination_class = 
+
     
     
     def get_serializer_class(self):
@@ -55,7 +36,6 @@ class BlogView(ModelViewSet):
         if self.request.method == 'GET':
             return []
         if self.request.method in ['PATCH', 'PUT', 'DELETE']:
-            # return [IsPostAuthor]
             return [permissions.IsAuthenticated(), IsBlogOwner()]
         return super().get_permissions()
     
@@ -173,23 +153,7 @@ class BlogView(ModelViewSet):
 class CommentView(mixins.CreateModelMixin,
                   mixins.ListModelMixin,
                   GenericViewSet):
-    """    
-        PAYLOAD
-    
-    {
-        "requestType":"inbound",
-        "data":{
-            "title":"Blog 1",
-            "body":"This is the bodyy",
-            "category":1,       integer id of a category
-            "image":image-file  this is nullable
-        }
-    }
-    
-    news/{id}   == To Get a single news and Update it
-    """
-    
-    # permission_classes = [IsAuthenticated & (IsAdmin | IsAgentAdmin)]
+  
     serializer_class = CommentSerializer
     queryset = Comment.objects.all()
     permission_classes = [permissions.IsAuthenticated]
